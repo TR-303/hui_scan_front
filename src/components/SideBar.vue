@@ -11,7 +11,7 @@
       <router-link class="item" to="/image-import">图片导入</router-link>
       <router-link class="item" to="/defect-recognition">缺陷识别</router-link>
       <router-link class="item" to="/data-query">数据查询</router-link>
-      <router-link class="item" to="/report-generation">报告生成</router-link>
+      <router-link class="item" to="/data-inspect">数据统计</router-link>
     </nav>
   </div>
 </template>
