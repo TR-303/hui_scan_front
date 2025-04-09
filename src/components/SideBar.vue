@@ -51,7 +51,7 @@
   background-color: #e6f7ff;
 }
 
-/* stylelint-disable-next-line no-unused-selectors */
+/* noinspection CssUnusedSymbol */
 .item.router-link-active {
   background-color: #bae7ff;
   font-weight: bold;
