@@ -32,7 +32,7 @@ function handleOpenDialog() {
       </div>
       <div class="image-list">
         <div v-for="(img, idx) in images" :key="idx" class="preview-image">
-          <img :src="img" class="preview-image"/>
+          <img alt="无法显示图片" :src="img" class="preview-image"/>
         </div>
       </div>
     </div>
