@@ -99,6 +99,13 @@ async function handleDetectAll() {
   }
 }
 
+function handleUpdateHasDefect(result) {
+  const image = currentBatch.value.images.find(img => img.imageId === result["imageId"])
+  if (image) {
+    image.status = result['hasDefect'] ? 'faulty' : 'flawless'
+  }
+}
+
 onMounted(get_current_batch)
 </script>
 
@@ -122,7 +129,7 @@ onMounted(get_current_batch)
         </div>
       </div>
       <div class="card" style="flex: 1; min-width: 0; min-height: 0;">
-        <ImageViewer v-if="imageId!==''" :image-id="imageId"/>
+        <ImageViewer v-if="imageId!==''" :image-id="imageId" @update-has-defect="handleUpdateHasDefect"/>
       </div>
     </div>
   </div>

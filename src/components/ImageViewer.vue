@@ -1,5 +1,5 @@
 <script setup>
-import {ref, defineProps, computed, watch} from 'vue';
+import {ref, defineProps, computed, watch, defineEmits} from 'vue';
 import {useRoute} from 'vue-router';
 import {ElMessage} from "element-plus";
 
@@ -13,6 +13,7 @@ const props = defineProps({
     required: false
   }
 });
+const emit = defineEmits(['updateHasDefect']);
 
 const imageId = computed(() => props.imageId || route.params.imageId);
 
@@ -46,6 +47,30 @@ function fetchImageDetails() {
     }
   }).catch(err => {
     console.error(err);
+    ElMessage.error(`服务器错误: ${err.message} ${err.code ?? ''}`);
+  });
+}
+
+function handleDetectSingle() {
+  fetch(`${baseUrl}/detect/single-detect?imageId=${imageId.value}`, {
+    method: 'POST'
+  }).then(async res => {
+    const result = await res.json();
+    if (res.status === 200) {
+      currentImage.value.detectTime = result["detectTime"];
+      currentImage.value.processed = result["processed"];
+      currentImage.value.defects = result["defects"];
+      if (!route.params.imageId) {
+        emit('updateHasDefect', result);
+      }
+      ElMessage.success("检测完成");
+    } else if (res.status === 400 || res.status === 404) {
+      ElMessage.error(result.error);
+    } else {
+      ElMessage.error("未知错误，请联系管理员");
+    }
+  }).catch(err => {
+    console.error(err.message);
     ElMessage.error(`服务器错误: ${err.message} ${err.code ?? ''}`);
   });
 }
@@ -85,7 +110,7 @@ watch(imageId, fetchImageDetails, {immediate: true});
       </div>
       <div v-else>
         <p>未检测</p>
-        <button style="width: 6rem">立即检测</button>
+        <button style="width: 6rem" @click="handleDetectSingle">立即检测</button>
       </div>
     </div>
   </div>
