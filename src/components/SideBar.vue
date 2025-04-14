@@ -1,4 +1,7 @@
 <script setup>
+import {useRoute} from 'vue-router';
+
+const route = useRoute();
 </script>
 
 <template>
@@ -9,7 +12,9 @@
     </div>
     <nav class="item-container">
       <router-link class="item" to="/image-import">图片导入</router-link>
-      <router-link class="item" to="/defect-recognition">缺陷识别</router-link>
+      <router-link class="item" to="/defect-recognition"
+                   :class="{'router-link-active': route.path.startsWith('/defect-recognition') }">缺陷识别
+      </router-link>
       <router-link class="item" to="/data-query">数据查询</router-link>
       <router-link class="item" to="/data-inspect">数据统计</router-link>
     </nav>
@@ -51,7 +56,6 @@
   background-color: #e6f7ff;
 }
 
-/* noinspection CssUnusedSymbol */
 .item.router-link-active {
   background-color: #bae7ff;
   font-weight: bold;
