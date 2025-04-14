@@ -29,6 +29,7 @@ function get_current_batch() {
     const result = await res.json()
     if (res.status === 200) {
       currentBatch.value = result
+      console.log(result)
     } else if (res.status === 400 || res.status === 404) {
       ElMessage.error(result.error)
     } else {
@@ -50,8 +51,10 @@ onMounted(get_current_batch)
 <template>
   <div style="display: flex; flex-direction: column; height: 100%; padding: 1rem; gap: 1rem;">
     <div class="card" style="flex: none; min-height: min-content;">
-      <h2>当前批次: {{ currentBatch.batchId }}</h2>
-      <p>导入时间: {{ currentBatch.importTime }}</p>
+      <h2>批号： {{ currentBatch.batchId }}</h2>
+      <p>导入时间： {{ currentBatch.importTime }}</p>
+      <p>容量： {{ currentBatch.size }}</p>
+      <p>状态： {{ currentBatch.status }}</p>
     </div>
     <div style="flex: 1; min-height: 0; display: flex; gap: 1rem;">
       <div class="card" style="display: flex; flex-direction: column; min-width: 150px; min-height: 0;">
@@ -77,6 +80,7 @@ onMounted(get_current_batch)
   grid-auto-rows: min-content;
   gap: 1rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .preview-image {
@@ -85,11 +89,17 @@ onMounted(get_current_batch)
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 .preview-image img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.preview-image:hover {
+  transform: scale(1.05);
 }
 </style>
