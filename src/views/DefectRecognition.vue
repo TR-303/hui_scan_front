@@ -2,6 +2,7 @@
 import {useRoute} from 'vue-router'
 import {ref, onMounted} from 'vue'
 import {ElMessage} from 'element-plus'
+import ImageViewer from "@/components/ImageViewer.vue";
 
 const route = useRoute()
 
@@ -19,6 +20,8 @@ const currentBatch = ref({
   }]
 })
 
+const imageId = ref('')
+
 function get_current_batch() {
   fetch(`${baseUrl}/batch/get-batch-detail?batchId=${batchId}`, {
     method: 'GET'
@@ -26,10 +29,7 @@ function get_current_batch() {
     const result = await res.json()
     if (res.status === 200) {
       currentBatch.value = result
-      console.log(result)
-    } else if (res.status === 400) {
-      ElMessage.error(result.error)
-    } else if (res.status === 404) {
+    } else if (res.status === 400 || res.status === 404) {
       ElMessage.error(result.error)
     } else {
       ElMessage.error("未知错误，请联系管理员")
@@ -40,8 +40,8 @@ function get_current_batch() {
   })
 }
 
-function handleViewImage(imageId) {
-
+function handleViewImage(id) {
+  imageId.value = id.toString()
 }
 
 onMounted(get_current_batch)
@@ -56,12 +56,15 @@ onMounted(get_current_batch)
     <div style="flex: 1; min-height: 0; display: flex; gap: 1rem;">
       <div class="card" style="display: flex; flex-direction: column; min-width: 150px; min-height: 0;">
         <div class="image-list">
-          <div v-for="(img, idx) in currentBatch.images" :key="idx" class="preview-image" @click="handleViewImage(img.imageId)">
+          <div v-for="(img, idx) in currentBatch.images" :key="idx" class="preview-image"
+               @click="handleViewImage(img.imageId)">
             <img :src='resourceUrl+img.thumbnail' alt="略缩图"/>
           </div>
         </div>
       </div>
-      <div class="card" style="flex: 1; min-width: 0; min-height: 0;"></div>
+      <div class="card" style="flex: 1; min-width: 0; min-height: 0;">
+        <ImageViewer v-if="imageId!==''" :image-id="imageId"/>
+      </div>
     </div>
   </div>
 </template>

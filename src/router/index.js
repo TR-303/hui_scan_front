@@ -1,9 +1,10 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import ImageImport from '../views/ImageImport.vue'
 import DefectRecognition from '../views/DefectRecognition.vue'
-import DataQuery from '../views/DataQuery.vue'
+import ImageQuery from '../views/ImageQuery.vue'
 import DataInspect from '../views/DataInspect.vue'
 import BatchList from '../views/BatchList.vue'
+import ImageViewer from "@/components/ImageViewer.vue";
 
 const routes = [
     {path: '/', name: 'Home', redirect: '/image-import'},
@@ -14,7 +15,12 @@ const routes = [
             {path: 'detect/:batchId', name: 'Detect', component: DefectRecognition, props: true},
         ], redirect: '/defect-recognition/batch-list'
     },
-    {path: '/data-query', name: 'DataQuery', component: DataQuery},
+    {
+        path: '/data-query', children: [
+            {path: 'image-query', name: 'ImageQuery', component: ImageQuery},
+            {path: 'image/:imageId', name: 'Image', component: ImageViewer, props: true},
+        ], redirect: '/data-query/image-query'
+    },
     {path: '/data-inspect', name: 'DataInspect', component: DataInspect}
 ]
 
