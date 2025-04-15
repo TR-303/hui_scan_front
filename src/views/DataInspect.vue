@@ -56,23 +56,6 @@ const singleStatisticsData = ref({
   dates: []
 })
 
-const fetchStatistics = async () => {
-  if (dateRange.value.length !== 2) return
-
-  const [start, end] = dateRange.value
-  const params = new URLSearchParams({
-    start_time: start,
-    end_time: end
-  })
-
-  const res = await fetch(`${baseUrl}/image/get-image-statistics?${params.toString()}`)
-  const data = await res.json()
-  data.proportionData = data.proportionData || []
-  statisticsData.value = data.statisticsData
-  proportionData.value = data.proportionData
-  singleStatisticsData.value = data.singleStatisticsData
-}
-
 function initStatisticsChart() {
   if (!statisticsRef.value) return
   statisticsInstance = echarts.init(statisticsRef.value)
@@ -176,62 +159,47 @@ function initSingleStatisticsChart() {
     return
   singleStatisticsInstance = echarts.init(singleStatisticsRef.value)
 
-  const option = {
-    title: {
-      text: '单项缺陷数量统计',
-      left: 'center'
-    },
-    tooltip: {
-      trigger: 'axis'
-    },
-    legend: {
-      orient: 'vertical',
-      right: 0,
-      top: 'center'
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {}
-      }
-    },
-    xAxis: {
-      type: 'category',
-      boundaryGap: false,
-      data: singleStatisticsData.value.dates,
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        name: 'A类缺陷',
-        type: 'line',
-        data: singleStatisticsData.value.defect_A
-      },
-      {
-        name: 'B类缺陷',
-        type: 'line',
-        data: singleStatisticsData.value.defect_B
-      },
-      {
-        name: 'C类缺陷',
-        type: 'line',
-        data: singleStatisticsData.value.defect_C
-      },
-      {
-        name: 'D类缺陷',
-        type: 'line',
-        data: singleStatisticsData.value.defect_D
-      },
-    ]
-  }
-  singleStatisticsInstance.setOption(option)
+    const option = {
+        title: {
+            text: '单项缺陷数量统计',
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            orient: 'vertical',
+            right: 0,
+            top: 'center'
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: singleStatisticsData.value.dates || []
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: Object.keys(singleStatisticsData.value)
+            .filter(key => key !== 'dates')
+            .map(defectType => ({
+                name: defectType,
+                type: 'line',
+                data: singleStatisticsData.value[defectType] || []
+            }))
+    };
+    singleStatisticsInstance.setOption(option)
 }
 
 function resize() {
@@ -246,6 +214,23 @@ function resize() {
   }
 }
 
+const fetchStatistics = async () => {
+  if (dateRange.value.length !== 2) return
+
+  const [start, end] = dateRange.value
+  const params = new URLSearchParams({
+    start_time: start,
+    end_time: end
+  })
+
+  const res = await fetch(`${baseUrl}/image/get-image-statistics?${params.toString()}`)
+  const data = await res.json()
+  data.proportionData = data.proportionData || []
+  statisticsData.value = data.statisticsData
+  proportionData.value = data.proportionData
+  singleStatisticsData.value = data.singleStatisticsData
+}
+
 async function handleDateFilter() {
   if (dateRange.value.length !== 2) return
   const [start, end] = dateRange.value
@@ -258,14 +243,9 @@ async function handleDateFilter() {
   const res = await fetch(`${baseUrl}/image/get-image-statistics?${params.toString()}`)
   const data = await res.json()
   data.proportionData = data.proportionData || []
-  console.log(data.statisticsData)
-  console.log(data.proportionData)
-  console.log(data.singleStatisticsData)
-
   statisticsData.value = data.statisticsData
   proportionData.value = data.proportionData
   singleStatisticsData.value = data.singleStatisticsData
-
   updateAllCharts()
 }
 
