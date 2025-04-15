@@ -7,7 +7,7 @@ const route = useRoute();
 <template>
   <div class="sidebar-menu">
     <div class="logo">
-      <!-- 预留 Logo -->
+      <img src="@/assets/logo.png" alt="Logo" style="width: 20%;"/>
       <span>慧识</span>
     </div>
     <nav class="item-container">
@@ -29,8 +29,12 @@ const route = useRoute();
 }
 
 .logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   padding: 1rem;
   font-size: 1.5rem;
+  gap: 0.5rem;
 }
 
 .item-container {
