@@ -32,6 +32,7 @@ export default {
 
 .main-content {
   width: 100%;
+  flex: 1;
   height: 100%;
   background: #f7f7f7;
 }
