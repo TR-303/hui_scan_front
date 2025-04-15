@@ -80,13 +80,13 @@ function handleDetectSingle() {
 
 function getDefectColor(defectType) {
   switch (defectType) {
-    case '夹杂物':
+    case '边缘裂纹':
       return 'blue';
-    case '补丁':
+    case '横向裂纹':
       return 'green';
-    case '划痕':
+    case '表面杂质':
       return 'orange';
-    case '其他缺陷':
+    case '斑块缺陷':
       return 'red';
     default:
       return 'black';
