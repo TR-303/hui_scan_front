@@ -75,6 +75,21 @@ function handleDetectSingle() {
   });
 }
 
+function getDefectColor(defectType) {
+  switch (defectType) {
+    case '夹杂物':
+      return 'blue';
+    case '补丁':
+      return 'green';
+    case '划痕':
+      return 'orange';
+    case '其他缺陷':
+      return 'red';
+    default:
+      return 'black';
+  }
+}
+
 watch(imageId, fetchImageDetails, {immediate: true});
 
 </script>
@@ -102,7 +117,9 @@ watch(imageId, fetchImageDetails, {immediate: true});
         <h3>缺陷列表</h3>
         <ul>
           <li v-for="defect in currentImage.defects" :key="defect.defectId">
-            缺陷ID: {{ defect.defectId }} ({{ defect.defectType }}),
+            <span :style="{ color: getDefectColor(defect.defectType) }">
+              缺陷ID: {{ defect.defectId }} ({{ defect.defectType }})
+            </span>,
             置信度: {{ defect.confidence }},
             框: {{ defect.bbox }}
           </li>

@@ -68,7 +68,7 @@ function handleUpload() {
   <div style="display: flex; flex-direction: row; height: 100%; padding: 1rem; gap: 1rem;">
     <div class="card" style="display: flex; flex-direction: column; padding :1rem; width :70%; height :100%;">
       <div style="padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <h2>上传的图片</h2>
+        <h2>等待上传的图片：</h2>
         <button @click="handleUpload">上传到数据库</button>
       </div>
       <div class="image-list">
