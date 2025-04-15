@@ -54,7 +54,7 @@ function handleUpload() {
       ElMessage.error(result.error);
     } else {
       console.error(result);
-      ElMessage.error("未知错误，请联系管理员");
+      ElMessage.error(`${result.error} ${res.status}`);
     }
   }).catch(err => {
     ElMessage.error(`服务器错误: ${err.message} ${err.code ?? ''}`)
@@ -108,6 +108,7 @@ function handleUpload() {
   height: auto;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
+  overflow-y: scroll;
 }
 
 .preview-image {

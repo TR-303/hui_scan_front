@@ -33,7 +33,7 @@ function get_current_batch() {
     } else if (res.status === 400 || res.status === 404) {
       ElMessage.error(result.error)
     } else {
-      ElMessage.error("未知错误，请联系管理员")
+      ElMessage.error(`${result.error} ${res.status}`);
     }
   }).catch(err => {
     console.error(err)

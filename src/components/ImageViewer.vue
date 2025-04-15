@@ -1,7 +1,7 @@
 <script setup>
 import {ref, defineProps, computed, watch, defineEmits} from 'vue';
 import {useRoute} from 'vue-router';
-import {ElMessage} from "element-plus";
+import {ElMessage, ElTable, ElTableColumn} from "element-plus";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 const resourceUrl = import.meta.env.VITE_RESOURCE_URL;
@@ -67,7 +67,7 @@ function handleDetectSingle() {
     } else if (res.status === 400 || res.status === 404) {
       ElMessage.error(result.error);
     } else {
-      ElMessage.error("未知错误，请联系管理员");
+      ElMessage.error(`${result.error} ${res.status}`);
     }
   }).catch(err => {
     console.error(err.message);
@@ -100,13 +100,12 @@ watch(imageId, fetchImageDetails, {immediate: true});
       <div v-if="currentImage.processed">
         <img :src="resourceUrl+currentImage.processed" alt="Processed image"/>
         <h3>缺陷列表</h3>
-        <ul>
-          <li v-for="defect in currentImage.defects" :key="defect.defectId">
-            缺陷ID: {{ defect.defectId }} ({{ defect.defectType }}),
-            置信度: {{ defect.confidence }},
-            框: {{ defect.bbox }}
-          </li>
-        </ul>
+        <el-table :data="currentImage.defects" style="width: 100%">
+          <el-table-column type="index" label="序号" width="120"/>
+          <el-table-column prop="defectType" label="缺陷类型" width="150"/>
+          <el-table-column prop="confidence" label="置信度" width="100"/>
+          <el-table-column prop="bbox" label="bbox"/>
+        </el-table>
       </div>
       <div v-else>
         <p>未检测</p>
