@@ -1,7 +1,7 @@
 <template>
     <div class="card">
         <div class="title">数据统计</div>
-        <div>按时间筛选</div>
+        <div style="margin-top: 10px; margin-left: 40px;">按时间筛选</div>
         <el-date-picker
         v-model="dateRange"
         type="daterange"
@@ -10,7 +10,7 @@
         format="YYYY-MM-DD"
         value-format="YYYY-MM-DD"
         @change="handleDateFilter"
-        style="margin-bottom: 20px; margin-top: 10px;"
+        style="margin-bottom: 20px; margin-top: 10px; margin-left: 40px;"
         />
 
         <div class="chart">
@@ -28,300 +28,289 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, onBeforeUnmount} from 'vue'
-    import * as echarts from 'echarts'
-    import { ElDatePicker } from 'element-plus'
-    import 'element-plus/es/components/date-picker/style/css'
+import { ref, onMounted, onBeforeUnmount} from 'vue'
+import * as echarts from 'echarts'
+import { ElDatePicker } from 'element-plus'
+import 'element-plus/es/components/date-picker/style/css'
 
-    const statisticsRef = ref(null)
-    let statisticsInstance = null
-    const proportionRef = ref(null)
-    let proportionInstance = null
-    const singleStatisticsRef = ref(null)
-    let singleStatisticsInstance = null
+const baseUrl = import.meta.env.VITE_API_URL
+const statisticsRef = ref(null)
+let statisticsInstance = null
+const proportionRef = ref(null)
+let proportionInstance = null
+const singleStatisticsRef = ref(null)
+let singleStatisticsInstance = null
 
-    const statisticsData = ref({
-        dates: ['2025-04-01', '2025-04-02', '2025-04-03', '2025-04-04', '2025-04-05'],
-        total: [2, 6, 4, 8, 6],
-        defect: [1, 3, 2, 4, 3]
-    })
 
-    const proportionData = [
-        { name: '裂纹', value: 45 },
-        { name: '锈蚀', value: 30 },
-        { name: '划痕', value: 20 },
-        { name: '凹坑', value: 25 },
-        { name: '无缺陷', value: 80 }
-    ]
+const dateRange = ref([])
 
-    const singleStatisticsData = ref({
-        dates: ['2025-04-01', '2025-04-02', '2025-04-03', '2025-04-04', '2025-04-05'],
-        defect_A: [1, 2, 3, 4, 5],
-        defect_B: [2, 4, 6, 8, 10],
-        defect_C: [1, 3, 2, 4, 6],
-        defect_D: [4, 2, 3, 8, 4],
-    })
+const statisticsData = ref({
+  dates: [],
+  total: [],
+  defect: []
+})
 
-    function initStatisticsChart() {
-        if (!statisticsRef.value) return
-        statisticsInstance = echarts.init(statisticsRef.value)
+const proportionData = ref([])
+const singleStatisticsData = ref({
+  dates: []
+})
 
-        const option = {
-            title: {
-                text: '每日钢材检测数量统计',
-                left: 'center'
-            },
-            tooltip: {
-                trigger: 'axis'
-            },
-            legend: {
-                orient: 'vertical',
-                right: 0,
-                top: 'center',
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            toolbox: {
-                feature: {
-                saveAsImage: {}
-                }
-            },
-            xAxis: {
-                type: 'category',
-                // boundaryGap: false,
-                data: statisticsData.value.dates,
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [
-                {
-                    name: '检测总数',
-                    type: 'bar',
-                    data: statisticsData.value.total
-                },
-                {
-                    name: '有缺陷数量',
-                    type: 'bar',
-                    data: statisticsData.value.defect
-                }
-            ]
-        }
-        statisticsInstance.setOption(option)
-    }
+const fetchStatistics = async () => {
+  if (dateRange.value.length !== 2) return
 
-    function initProportionChart() {
-        if (!proportionRef.value) return
-        proportionInstance = echarts.init(proportionRef.value)
+  const [start, end] = dateRange.value
+  const params = new URLSearchParams({
+    start_time: start,
+    end_time: end
+  })
 
-        const option = {
-            title: {
-                text: '钢材缺陷类型占比',
-                left: 'center'
-            },
-            tooltip: {
-                trigger: 'item',
-                formatter: '{a} <br/>{b}: {c} ({d}%)'
-            },
-            legend: {
-                orient: 'vertical',
-                right: 0,
-                top: 'center'
-            },
-            toolbox: {
-                feature: {
-                saveAsImage: {}
-                }
-            },
-            series: [
+  const res = await fetch(`${baseUrl}/image/get-image-statistics?${params.toString()}`)
+  const data = await res.json()
+  data.proportionData = data.proportionData || []
+  statisticsData.value = data.statisticsData
+  proportionData.value = data.proportionData
+  singleStatisticsData.value = data.singleStatisticsData
+}
+
+function initStatisticsChart() {
+    if (!statisticsRef.value) return
+    statisticsInstance = echarts.init(statisticsRef.value)
+
+    const option = {
+        title: {
+            text: '每日钢材检测数量统计',
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            orient: 'vertical',
+            right: 0,
+            top: 'center',
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+            saveAsImage: {}
+            }
+        },
+        xAxis: {
+            type: 'category',
+            // boundaryGap: false,
+            data: statisticsData.value.dates,
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
             {
-                name: '缺陷类型',
-                type: 'pie',
-                radius: '60%',
-                center: ['50%', '60%'],
-                data: proportionData,
-                emphasis: {
+                name: '检测总数',
+                type: 'bar',
+                data: statisticsData.value.total
+            },
+            {
+                name: '有缺陷数量',
+                type: 'bar',
+                data: statisticsData.value.defect
+            }
+        ]
+    }
+    statisticsInstance.setOption(option)
+}
+
+function initProportionChart() {
+    if (!proportionRef.value) return;
+    const validatedData = (Array.isArray(proportionData.value) ? proportionData.value : [])
+        .map(item => ({
+            name: item?.name || '未知',
+            value: Number(item?.value) || 0,
+        }))
+        .filter(item => item.value > 0);
+    proportionInstance = echarts.init(proportionRef.value);
+    const option = {
+        title: {
+            text: '钢材缺陷类型占比',
+            left: 'center',
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b}: {c} ({d}%)',
+        },
+        legend: {
+            orient: 'vertical',
+            right: 0,
+            top: 'center',
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+            },
+        },
+        series: [{
+            name: '缺陷类型',
+            type: 'pie',
+            radius: '60%',
+            center: ['50%', '60%'],
+            data: validatedData, // 使用校验后的数据
+            emphasis: {
                 itemStyle: {
                     shadowBlur: 10,
                     shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                }
-                }
+                    shadowColor: 'rgba(0, 0, 0, 0.5)',
+                },
+            },
+        }],
+    };
+    proportionInstance.setOption(option);
+}
+
+function initSingleStatisticsChart() {
+    if (!singleStatisticsRef.value) 
+        return
+    singleStatisticsInstance = echarts.init(singleStatisticsRef.value)
+
+    const option = {
+        title: {
+            text: '单项缺陷数量统计',
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            orient: 'vertical',
+            right: 0,
+            top: 'center'
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+        bottom: '3%',
+        containLabel: true
+        },
+        toolbox: {
+            feature: {
+            saveAsImage: {}
             }
-            ]  
-        }
-        proportionInstance.setOption(option)
-    }
-
-    function initSingleStatisticsChart() {
-        if (!singleStatisticsRef.value) 
-            return
-        singleStatisticsInstance = echarts.init(singleStatisticsRef.value)
-
-        const option = {
-            title: {
-                text: '单项缺陷数量统计',
-                left: 'center'
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: singleStatisticsData.value.dates,
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+            name: 'A类缺陷',
+            type: 'line',
+            data: singleStatisticsData.value.defect_A
             },
-            tooltip: {
-                trigger: 'axis'
+            {
+            name: 'B类缺陷',
+            type: 'line',
+            data: singleStatisticsData.value.defect_B
             },
-            legend: {
-                orient: 'vertical',
-                right: 0,
-                top: 'center'
+            {
+            name: 'C类缺陷',
+            type: 'line',
+            data: singleStatisticsData.value.defect_C
             },
-            grid: {
-                left: '3%',
-                right: '4%',
-            bottom: '3%',
-            containLabel: true
+            {
+            name: 'D类缺陷',
+            type: 'line',
+            data: singleStatisticsData.value.defect_D
             },
-            toolbox: {
-                feature: {
-                saveAsImage: {}
-                }
-            },
-            xAxis: {
-                type: 'category',
-                boundaryGap: false,
-                data: singleStatisticsData.value.dates,
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [
-                {
-                name: 'A类缺陷',
-                type: 'line',
-                data: singleStatisticsData.value.defect_A
-                },
-                {
-                name: 'B类缺陷',
-                type: 'line',
-                data: singleStatisticsData.value.defect_B
-                },
-                {
-                name: 'C类缺陷',
-                type: 'line',
-                data: singleStatisticsData.value.defect_C
-                },
-                {
-                name: 'D类缺陷',
-                type: 'line',
-                data: singleStatisticsData.value.defect_D
-                },
-            ]
-        }
-        singleStatisticsInstance.setOption(option)
+        ]
     }
+    singleStatisticsInstance.setOption(option)
+}
 
-    function resize() {
-        if (statisticsInstance) {
-            statisticsInstance.resize()
-        }
-        if (proportionInstance) {
-            proportionInstance.resize()
-        }
-        if (singleStatisticsInstance) {
-            singleStatisticsInstance.resize()
-        }
+function resize() {
+    if (statisticsInstance) {
+        statisticsInstance.resize()
     }
-
-    onMounted(function () {
-        initStatisticsChart()
-        initProportionChart()
-        initSingleStatisticsChart()
-        window.addEventListener('resize', resize)
-    })
-
-    onBeforeUnmount(function () {
-        if (statisticsInstance) {
-            statisticsInstance.dispose()
-        }
-        if (proportionInstance) {
-            proportionInstance.dispose()
-        }
-        if (singleStatisticsInstance) {
-            singleStatisticsInstance.dispose()
-        }
-        window.removeEventListener('resize', resize)
-    })
-
-    const dateRange = ref([])
-
-    const originalStatisticsData = JSON.parse(JSON.stringify(statisticsData.value))
-    const originalProportionData = JSON.parse(JSON.stringify(proportionData))
-    const originalSingleStatisticsData = JSON.parse(JSON.stringify(singleStatisticsData.value))
-
-    function handleDateFilter() {
-    if (dateRange.value.length !== 2) return
-
-    const [start, end] = dateRange.value
-
-    const filteredDates = []
-    const filteredTotal = []
-    const filteredDefect = []
-
-    for (let i = 0; i < originalStatisticsData.dates.length; i++) {
-        const date = originalStatisticsData.dates[i]
-        if (date >= start && date <= end) {
-        filteredDates.push(date)
-        filteredTotal.push(originalStatisticsData.total[i])
-        filteredDefect.push(originalStatisticsData.defect[i])
-        }
+    if (proportionInstance) {
+        proportionInstance.resize()
     }
-
-    statisticsData.value = {
-        dates: filteredDates,
-        total: filteredTotal,
-        defect: filteredDefect
+    if (singleStatisticsInstance) {
+        singleStatisticsInstance.resize()
     }
+}
 
-    const totalBefore = originalStatisticsData.total.reduce((a, b) => a + b, 0)
-    const totalAfter = filteredTotal.reduce((a, b) => a + b, 0)
-    const scale = totalBefore === 0 ? 0 : totalAfter / totalBefore
+async function handleDateFilter() {
+  if (dateRange.value.length !== 2) return
+  const [start, end] = dateRange.value
 
-    proportionData.splice(0, proportionData.length, ...originalProportionData.map(item => ({
-        name: item.name,
-        value: Math.round(item.value * scale)
-    })))
+  const params = new URLSearchParams({
+    start_time: start,
+    end_time: end
+  })
 
-    const filteredDefect_A = []
-    const filteredDefect_B = []
-    const filteredDefect_C = []
-    const filteredDefect_D = []
+  const res = await fetch(`${baseUrl}/image/get-image-statistics?${params.toString()}`)
+  const data = await res.json()
+  data.proportionData = data.proportionData || []
+  console.log(data.statisticsData)
+  console.log(data.proportionData)
+  console.log(data.singleStatisticsData)
 
-    for (let i = 0; i < originalSingleStatisticsData.dates.length; i++) {
-        const date = originalSingleStatisticsData.dates[i]
-        if (date >= start && date <= end) {
-        filteredDefect_A.push(originalSingleStatisticsData.defect_A[i])
-        filteredDefect_B.push(originalSingleStatisticsData.defect_B[i])
-        filteredDefect_C.push(originalSingleStatisticsData.defect_C[i])
-        filteredDefect_D.push(originalSingleStatisticsData.defect_D[i])
-        }
+  statisticsData.value = data.statisticsData
+  proportionData.value = data.proportionData
+  singleStatisticsData.value = data.singleStatisticsData
+
+  updateAllCharts()
+}
+
+function updateAllCharts() {
+    if (statisticsInstance) {
+        statisticsInstance.dispose();
     }
-
-    singleStatisticsData.value = {
-        dates: filteredDates,
-        defect_A: filteredDefect_A,
-        defect_B: filteredDefect_B,
-        defect_C: filteredDefect_C,
-        defect_D: filteredDefect_D,
+    if (proportionInstance) {
+        proportionInstance.dispose();
     }
-
-    updateAllCharts()
+    if (singleStatisticsInstance) {
+        singleStatisticsInstance.dispose();
     }
-
-    function updateAllCharts() {
     initStatisticsChart()
     initProportionChart()
     initSingleStatisticsChart()
+}
+
+onMounted(async function () {
+  const today = new Date()
+  const sevenDaysAgo = new Date(today)
+  sevenDaysAgo.setDate(today.getDate() - 6)
+
+  const formatDate = d => d.toISOString().split('T')[0]
+  dateRange.value = [formatDate(sevenDaysAgo), formatDate(today)]
+
+  await fetchStatistics()
+
+  initStatisticsChart()
+  initProportionChart()
+  initSingleStatisticsChart()
+  window.addEventListener('resize', resize)
+})
+
+onBeforeUnmount(function () {
+    if (statisticsInstance) {
+        statisticsInstance.dispose()
     }
+    if (proportionInstance) {
+        proportionInstance.dispose()
+    }
+    if (singleStatisticsInstance) {
+        singleStatisticsInstance.dispose()
+    }
+    window.removeEventListener('resize', resize)
+})
 </script>
 
 <style scoped>
@@ -334,8 +323,9 @@
 .card {
     margin-left: auto;
     margin-right: auto;
-    padding: 1rem;
-    width: 100%;
+    flex-direction: row;
+    width: 95%;
+    margin-top: 20px;
 }
 .chart{
     display: flex;

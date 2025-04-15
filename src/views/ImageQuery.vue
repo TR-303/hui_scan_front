@@ -1,5 +1,6 @@
 <template>
-    <div class="card">
+    <div class="card" style="margin-top: 20px;">
+      <div class="title">数据查询</div>
       <el-form :inline="true" :model="filters" class="mb-4">
         <el-form-item label="时间范围">
           <el-date-picker
@@ -67,6 +68,7 @@
   import 'element-plus/es/components/date-picker/style/css'
   
   const router = useRouter()
+  const baseUrl = import.meta.env.VITE_API_URL
   
   const filters = ref({
     dateRange: [],
@@ -74,67 +76,70 @@
     defectTypes: []
   })
   
-  const dataList = ref([
-    {
-      id: 'IMG001',
-      createTime: '2025-04-10',
-      status: '已检测',
-      detectTime: '2025-04-11',
-      defects: ['缺陷A']
-    },
-    {
-      id: 'IMG002',
-      createTime: '2025-04-12',
-      status: '未检测',
-      detectTime: '',
-      defects: []
-    },
-    {
-      id: 'IMG003',
-      createTime: '2025-04-13',
-      status: '已检测',
-      detectTime: '2025-04-14',
-      defects: ['缺陷B', '缺陷C']
-    }
-  ])
+  const filteredList = ref([])
   
-  const filteredList = ref([...dataList.value])
-  
-  function filterData() {
-    filteredList.value = dataList.value.filter(item => {
-      const [start, end] = filters.value.dateRange || []
-      const inDateRange = !start || (item.createTime >= start && item.createTime <= end)
-      const matchStatus = !filters.value.status || item.status === filters.value.status
-      const matchDefects =
-        filters.value.defectTypes.length === 0 ||
-        filters.value.defectTypes.some(type => item.defects.includes(type))
-      return inDateRange && matchStatus && matchDefects
+  async function filterData() {
+    const [start, end] = filters.value.dateRange || []
+
+    let detected = ''
+    if (filters.value.status === '已检测') detected = 'true'
+    else if (filters.value.status === '未检测') detected = 'false'
+
+    const defectType = filters.value.defectTypes[0] || ''
+
+    const params = new URLSearchParams({
+      ...(start && end && { start_time: start, end_time: end }),
+      ...(detected && { detected }),
+      ...(defectType && { defect_type: defectType }),
     })
+
+    try {
+      const res = await fetch(`${baseUrl}/image/get-image-list?${params.toString()}`)
+      const data = await res.json()
+
+      filteredList.value = data.map(item => ({
+        id: item.image_id,
+        createTime: item.create_time,
+        status: item.detected ? '已检测' : '未检测',
+        detectTime: item.detect_time || '',
+        defects: item.defect_types || []
+      }))
+    } catch (err) {
+      console.error('数据查询失败', err)
+    }
   }
-  
+
   function resetFilters() {
-    filters.value = {
+  filters.value = {
       dateRange: [],
       status: '',
       defectTypes: []
     }
-    filteredList.value = [...dataList.value]
+    filteredList.value = []
   }
   
   function goToDetail(id) {
-    router.push(`/example/path/${id}`)
+    router.push(`/data-query/image/${id}`)
   }
-  </script>
+</script>
   
 <style scoped>
-  .mr-1 {
-    margin-right: 4px;
-  }
-  .card {
+.mr-1 {
+  margin-right: 4px;
+}
+.card {
     margin-left: auto;
     margin-right: auto;
-    padding: 1rem;
-    width: 90%;
-  }
+    flex-direction: row;
+    width: 95%;
+    margin-top: 20px;
+}
+.title{
+  display: flex;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
 </style>
   
