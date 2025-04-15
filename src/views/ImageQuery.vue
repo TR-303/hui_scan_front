@@ -23,7 +23,8 @@
         </el-form-item>
 
         <el-form-item label="缺陷类型">
-          <el-select v-model="filters.defectTypes" multiple placeholder="选择缺陷类型" style="width: 400px;">
+          <el-select v-model="filters.defectTypes" multiple placeholder="选择缺陷类型" style="width: 400px;"
+                     :disabled="filters.status === '未检测'">
             <el-option label="夹杂物" value="夹杂物"/>
             <el-option label="补丁" value="补丁"/>
             <el-option label="划痕" value="划痕"/>
@@ -88,13 +89,15 @@ async function filterData() {
   if (filters.value.status === '已检测') detected = 'true'
   else if (filters.value.status === '未检测') detected = 'false'
 
-  const defectType = filters.value.defectTypes[0] || ''
+  const defectType = filters.value.defectTypes.join(',') || ''
 
   const params = new URLSearchParams({
     ...(start && end && {start_time: start, end_time: end}),
     ...(detected && {detected}),
     ...(defectType && {defect_type: defectType}),
   })
+
+  console.log(params.toString())
 
   try {
     const res = await fetch(`${baseUrl}/image/get-image-list?${params.toString()}`)

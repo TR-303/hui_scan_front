@@ -91,8 +91,11 @@ async function handleDetectAll() {
         }
       }
     }
-
-    ElMessage.success('检测全部完成')
+    const allProcessed = currentBatch.value.images.every(img => img.status !== 'untouched');
+    if (allProcessed) {
+      currentBatch.value.status = '已完成';
+      ElMessage.success('检测全部完成')
+    }
   } catch (err) {
     console.error('Fetch error:', err)
     ElMessage.error(`服务器错误: ${err.message} ${err.code ?? ''}`)
@@ -182,22 +185,22 @@ onMounted(get_current_batch)
 }
 
 /* noinspection CssUnusedSymbol */
-.icon-untouched{
+.icon-untouched {
   background-image: url("@/assets/untouched.png");
 }
 
 /* noinspection CssUnusedSymbol */
-.icon-pending{
+.icon-pending {
   background-image: url("@/assets/pending.png");
 }
 
 /* noinspection CssUnusedSymbol */
-.icon-faulty{
+.icon-faulty {
   background-image: url("@/assets/faulty.png");
 }
 
 /* noinspection CssUnusedSymbol */
-.icon-flawless{
+.icon-flawless {
   background-image: url("@/assets/flawless.png");
 }
 
