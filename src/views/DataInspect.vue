@@ -157,7 +157,7 @@ function initProportionChart() {
             type: 'pie',
             radius: '60%',
             center: ['50%', '60%'],
-            data: validatedData, // 使用校验后的数据
+            data: validatedData,
             emphasis: {
                 itemStyle: {
                     shadowBlur: 10,
