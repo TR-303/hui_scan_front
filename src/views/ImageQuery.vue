@@ -25,10 +25,10 @@
         <el-form-item label="缺陷类型">
           <el-select v-model="filters.defectTypes" multiple placeholder="选择缺陷类型" style="width: 400px;"
                      :disabled="filters.status === '未检测'">
-            <el-option label="夹杂物" value="夹杂物"/>
-            <el-option label="补丁" value="补丁"/>
-            <el-option label="划痕" value="划痕"/>
-            <el-option label="其他缺陷" value="其他缺陷"/>
+            <el-option label="表面杂质" value="表面杂质"/>
+            <el-option label="斑块缺陷" value="斑块缺陷"/>
+            <el-option label="横向裂纹" value="横向裂纹"/>
+            <el-option label="边缘裂纹" value="边缘裂纹"/>
           </el-select>
         </el-form-item>
 
