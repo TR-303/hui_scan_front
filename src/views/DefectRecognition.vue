@@ -12,7 +12,7 @@ const batchId = route.params.batchId
 const currentBatch = ref({
   'batchId': undefined,
   'importTime': undefined,
-  'status': undefined,
+  'status': '',
   'size': undefined,
   'images': [{
     imageId: undefined,
@@ -103,6 +103,10 @@ function handleUpdateHasDefect(result) {
   const image = currentBatch.value.images.find(img => img.imageId === result["imageId"])
   if (image) {
     image.status = result['hasDefect'] ? 'faulty' : 'flawless'
+  }
+  const allProcessed = currentBatch.value.images.every(img => img.status !== 'untouched');
+  if (allProcessed) {
+    currentBatch.value.status = '已完成';
   }
 }
 

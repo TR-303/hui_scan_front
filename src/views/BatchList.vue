@@ -41,6 +41,7 @@ sortValue=${params.sortValue}`, {
     method: 'GET'
   }).then(async res => {
     batches.value = await res.json()
+    console.log(batches.value)
     if (batches.value.length === 0) {
       ElMessage.warning("没有找到符合条件的批次")
     }
@@ -63,11 +64,11 @@ onMounted(handleSearchBatch)
         <el-select v-model="rangeMode" placeholder="选择范围" style="width: 100px;">
           <el-option label="按年" value="year"/>
           <el-option label="按月" value="month"/>
-          <el-option label="按日" value="date"/>
+          <el-option label="按日" value="day"/>
         </el-select>
         <el-date-picker v-if="rangeMode === 'year'" v-model="selectedDate" type="year" placeholder="选择年份"/>
         <el-date-picker v-if="rangeMode === 'month'" v-model="selectedDate" type="month" placeholder="选择月份"/>
-        <el-date-picker v-if="rangeMode === 'date'" v-model="selectedDate" type="date" placeholder="选择日期"/>
+        <el-date-picker v-if="rangeMode === 'day'" v-model="selectedDate" type="date" placeholder="选择日期"/>
       </div>
       <div style="display: flex; gap: 1rem; align-items: center; width: 100%;">
         <span>状态：</span>
