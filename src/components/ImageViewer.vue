@@ -1,5 +1,5 @@
 <script setup>
-import {ref, defineProps, computed, watch, defineEmits} from 'vue';
+import {computed, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import {ElMessage, ElTable, ElTableColumn} from "element-plus";
 
@@ -57,9 +57,12 @@ function handleDetectSingle() {
   }).then(async res => {
     const result = await res.json();
     if (res.status === 200) {
-      currentImage.value.detectTime = result["detectTime"];
-      currentImage.value.processed = result["processed"];
-      currentImage.value.defects = result["defects"];
+      currentImage.value = {
+        ...currentImage.value,
+        processed: result.processed,
+        detectTime: result.detectTime,
+        defects: result.defects,
+      }
       if (!route.params.imageId) {
         emit('updateHasDefect', result);
       }
@@ -119,8 +122,8 @@ watch(imageId, fetchImageDetails, {immediate: true});
           <el-table-column type="index" label="序号" width="120"/>
           <el-table-column prop="defectType" label="缺陷类型" width="150">
             <template #default="{ row }">
-              <span :style="{ color: getDefectColor(row.defectType) }">
-                {{ row.defectType }}
+              <span :style="{ color: getDefectColor(row['defectType']) }">
+                {{ row['defectType'] }}
               </span>
             </template>
           </el-table-column>

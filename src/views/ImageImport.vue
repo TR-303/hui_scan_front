@@ -73,7 +73,7 @@ function handleUpload() {
       </div>
       <div class="image-list">
         <div v-for="(img, idx) in images" :key="idx" class="preview-image">
-          <img alt="无法显示图片" :src="getImageUrl(img)" class="preview-image"/>
+          <img alt="无法显示图片" :src="getImageUrl(img)"/>
         </div>
       </div>
     </div>
@@ -122,7 +122,7 @@ function handleUpload() {
 .preview-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .drop-zone {
