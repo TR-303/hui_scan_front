@@ -3,18 +3,21 @@
     <div class="card"
          style="display: flex; flex-direction: column; gap: 1rem; padding: 1rem; width: 100%; overflow-y: scroll;">
       <div class="title">数据统计</div>
-      <div style="margin-top: 10px; margin-left: 40px;">按时间筛选</div>
-      <el-date-picker
-          v-model="dateRange"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          @change="handleDateFilter"
-          style="margin-bottom: 20px; margin-top: 10px; margin-left: 40px;"
-      />
-
+      <div style="display: flex; flex-direction: row; gap: 1rem; padding: 1rem; width: 100%; height: auto;">
+        <span style="flex: 0 0 auto;">时间范围</span>
+        <el-date-picker
+            v-model="dateRange"
+            type="daterange"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            @change="handleDateFilter"
+            style="flex: 0 0 20%;"
+        />
+        <button style="flex: 0 0 10%; margin-left: auto; max-width: 150px; " @click="handleCreateReport()">生成报告
+        </button>
+      </div>
       <div class="card">
         <div ref="statisticsRef" style="width: 100%; height: 400px;"></div>
       </div>
@@ -159,47 +162,47 @@ function initSingleStatisticsChart() {
     return
   singleStatisticsInstance = echarts.init(singleStatisticsRef.value)
 
-    const option = {
-        title: {
-            text: '单项缺陷数量统计',
-            left: 'center'
-        },
-        tooltip: {
-            trigger: 'axis'
-        },
-        legend: {
-            orient: 'vertical',
-            right: 0,
-            top: 'center'
-        },
-        grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
-        toolbox: {
-            feature: {
-                saveAsImage: {}
-            }
-        },
-        xAxis: {
-            type: 'category',
-            boundaryGap: false,
-            data: singleStatisticsData.value.dates || []
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: Object.keys(singleStatisticsData.value)
-            .filter(key => key !== 'dates')
-            .map(defectType => ({
-                name: defectType,
-                type: 'line',
-                data: singleStatisticsData.value[defectType] || []
-            }))
-    };
-    singleStatisticsInstance.setOption(option)
+  const option = {
+    title: {
+      text: '单项缺陷数量统计',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      orient: 'vertical',
+      right: 0,
+      top: 'center'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: singleStatisticsData.value.dates || []
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: Object.keys(singleStatisticsData.value)
+        .filter(key => key !== 'dates')
+        .map(defectType => ({
+          name: defectType,
+          type: 'line',
+          data: singleStatisticsData.value[defectType] || []
+        }))
+  };
+  singleStatisticsInstance.setOption(option)
 }
 
 function resize() {
@@ -262,6 +265,31 @@ function updateAllCharts() {
   initStatisticsChart()
   initProportionChart()
   initSingleStatisticsChart()
+}
+
+async function handleCreateReport() {
+  fetch(`${baseUrl}/report/create-report?start_time=${dateRange.value[0]}&end_time=${dateRange.value[1]}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error('文件下载失败');
+    }
+    return response.blob();
+  }).then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'defect_report.pdf'; // 文件名与后端一致
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }).catch(error => {
+    console.error(error);
+  });
 }
 
 onMounted(async function () {
