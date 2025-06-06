@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted} from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import {useRouter} from 'vue-router'
 import {ElDatePicker, ElSelect, ElOption, ElMessage} from 'element-plus'
 
@@ -51,6 +51,18 @@ sortValue=${params.sortValue}`, {
   })
 }
 
+const currentPage = ref(1)
+const itemsPerPage = 12
+const pagedBatches = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = currentPage.value * itemsPerPage
+  return batches.value.slice(start, end)
+})
+
+function handlePageChange(page) {
+  currentPage.value = page
+}
+
 onMounted(handleSearchBatch)
 
 </script>
@@ -89,9 +101,9 @@ onMounted(handleSearchBatch)
         <button @click="handleSearchBatch" style="width: 100%; max-width: 8rem;">筛选</button>
       </div>
     </div>
-    <div class="card" style="width: 100%; height: 80%;">
-      <div class="batch-container">
-        <div class="batch-item" v-for="(b, idx) in batches" :key="idx" @click="handleClickBatch(b)">
+    <div class="card" style="width: 100%; height: 80%; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+      <div class="batch-container" style="width: 100%;">
+        <div class="batch-item" v-for="(b, idx) in pagedBatches" :key="idx" @click="handleClickBatch(b)">
           <div class="batch-item-entry">
             <span>批号:</span>
             <span>{{ b.batchId }}</span>
@@ -110,6 +122,13 @@ onMounted(handleSearchBatch)
           </div>
         </div>
       </div>
+      <el-pagination
+        v-model:current-page="currentPage"
+        :page-size="12"
+        :total="batches.length"
+        layout="prev, pager, next"
+        @current-change="handlePageChange"
+      />
     </div>
   </div>
 </template>
