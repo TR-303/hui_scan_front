@@ -46,10 +46,11 @@
 
 <script setup>
 import { ref, onBeforeUnmount } from 'vue'
+import { io } from "socket.io-client";
 
 const video = ref(null)
 const overlay = ref(null)
-const ws = ref(null)
+const socket = ref(null)
 const stream = ref(null)
 let intervalId = null
 const isRecognizing = ref(false)
@@ -68,39 +69,48 @@ async function startRecognition() {
   try {
     stream.value = await navigator.mediaDevices.getUserMedia({ video: true })
     video.value.srcObject = stream.value
-    ws.value = new WebSocket("ws://localhost:8765") 
-    ws.value.onopen = () => {
-      console.log("WebSocket connected")
+    socket.value = io("http://localhost:5001/video", {
+      transports: ["websocket"]
+    })
+    socket.value.on("connect", () => {
+      console.log("Socket.IO connected")
       isRecognizing.value = true
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       intervalId = setInterval(() => {
-        if (ws.value.readyState !== WebSocket.OPEN) return
-
+        if (!socket.value.connected) return
         canvas.width = video.value.videoWidth
         canvas.height = video.value.videoHeight
         ctx.drawImage(video.value, 0, 0, canvas.width, canvas.height)
         canvas.toBlob(blob => {
-          blob.arrayBuffer().then(buffer => ws.value.send(buffer))
+          if (blob) {
+             blob.arrayBuffer().then(buffer => {
+            socket.value.emit("frame", buffer)
+            })
+          }
         }, 'image/jpeg', 0.8)
       }, 100)
-    }
+    })
 
-    ws.value.onmessage = (event) => {
-      const data = JSON.parse(event.data)
+    socket.value.on("processed_frame", (data) => {
       drawOverlay(data.defects)
-    }
+      notifications.value = data.notifications || []
+    })
 
-    ws.value.onclose = () => {
-      console.log("WebSocket closed")
+    socket.value.on("error", (data) => {
+      console.error(data.msg)
+    })
+
+    socket.value.on("disconnect", () => {
+      console.log("Socket.IO disconnected")
       isRecognizing.value = false
       clearOverlay()
-    }
+    })
 
-    ws.value.onerror = (err) => {
-      console.error("WebSocket error", err)
+    socket.value.on("connect_error", (err) => {
+      console.error("Socket.IO error", err)
       stopRecognition()
-    }
+    })
   } catch (err) {
     console.error("Error starting recognition", err)
     stopRecognition()
@@ -111,9 +121,9 @@ function stopRecognition() {
   if (!isRecognizing.value && !stream.value) return
   clearInterval(intervalId)
   intervalId = null
-  if (ws.value) {
-    ws.value.close()
-    ws.value = null
+  if (socket.value) {
+    socket.value.disconnect()
+    socket.value = null
   }
   if (stream.value) {
     stream.value.getTracks().forEach(track => track.stop())
@@ -132,9 +142,20 @@ function drawOverlay(defects) {
   ctx.font = '16px Arial'
   ctx.fillStyle = 'red'
 
+  // 计算缩放比例
+  const videoEl = video.value
+  const canvasEl = overlay.value
+  const scaleX = canvasEl.width / videoEl.videoWidth
+  const scaleY = canvasEl.height / videoEl.videoHeight
+
   for (const defect of defects) {
-    ctx.strokeRect(defect.x, defect.y, defect.w, defect.h)
-    ctx.fillText(defect.label, defect.x, defect.y - 5)
+    // 按比例缩放坐标
+    const x = defect.x * scaleX
+    const y = defect.y * scaleY
+    const w = defect.w * scaleX
+    const h = defect.h * scaleY
+    ctx.strokeRect(x, y, w, h)
+    ctx.fillText(defect.label, x, y - 5)
   }
 }
 
