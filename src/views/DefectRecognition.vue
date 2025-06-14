@@ -14,11 +14,7 @@ const currentBatch = ref({
   'importTime': undefined,
   'status': '',
   'size': undefined,
-  'images': [{
-    imageId: undefined,
-    status: undefined,
-    thumbnail: undefined,
-  }]
+  'images': []
 })
 
 const imageId = ref('')
@@ -130,7 +126,7 @@ onMounted(get_current_batch)
         <div class="image-list">
           <div v-for="(img, idx) in currentBatch.images" :key="idx" class="preview-image"
                @click="handleViewImage(img.imageId)">
-            <img :src='resourceUrl+img.thumbnail' alt="略缩图"/>
+            <img v-lazy='resourceUrl+img.thumbnail' alt="略缩图"/>
             <div class="status-icon" :class="'icon-'+img.status"/>
           </div>
         </div>
