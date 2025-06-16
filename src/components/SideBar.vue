@@ -16,7 +16,7 @@ const route = useRoute();
       <router-link class="item" to="/defect-recognition"
                    :class="{'router-link-active': route.path.startsWith('/defect-recognition') }">缺陷识别
       </router-link>
-      <router-link class="item" to="/data-video-inspect">视频识别</router-link>
+      <router-link class="item" to="/video-recognition">视频识别</router-link>
       <router-link class="item" to="/data-query">数据查询</router-link>
       <router-link class="item" to="/data-inspect">数据统计</router-link>
     </nav>

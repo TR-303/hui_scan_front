@@ -18,7 +18,7 @@ const routes = [
             {path: 'detect/:batchId', name: 'Detect', component: DefectRecognition, props: true},
         ], redirect: '/defect-recognition/batch-list'
     },
-    {path: '/data-video-inspect', name: 'DataVideoInspect', component: VideoInspect},
+    {path: '/video-recognition', name: 'VideoRecognition', component: VideoInspect},
     {
         path: '/data-query', children: [
             {path: 'image-query', name: 'ImageQuery', component: ImageQuery},
